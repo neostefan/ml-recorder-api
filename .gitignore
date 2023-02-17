@@ -1,0 +1,8 @@
+*.env
+docker*
+dist/**
+node_modules/**
+compressed_files/**
+public/**
+*log
+data/**
