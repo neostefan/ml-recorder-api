@@ -33,7 +33,7 @@ server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 const db = (process.env.NODE_ENV == "production") ? Checker(process.env.MONGO_DB_PROD_URI) : Checker(process.env.MONGO_DB_DEV_URI)
 
 
-server.listen(Checker(process.env.PORT), () => {
+server.listen(process.env.PORT, () => {
     connect(db).then(() => {
         
     }).catch(e => {
