@@ -40,27 +40,34 @@ export const postSample: RequestHandler = async function(req: Request, res: Resp
     let sampleFile = req.file
 
     if(sampleFile === undefined) {
-        res.status(404).json({msg: "please insert a file!"})
+        res.status(404).json({msg: "No sample uploaded"})
     } else {
         try {
             //checks if the user uploading sample exists
-            //! For now a fixed user_id is used for all samples remove when needed
-            let eUser = await user.findOne({_id: "63ea4975caeaded71e66fd57"}) 
+            // let eUser = await user.findOne({_id: "63ea4975caeaded71e66fd57"})
+            //! disabling user check for now since user's are not used for registration currently
 
-            if(eUser) {
-                //if user exists create a sample model and save in database
-                let newSample: HydratedDocument<ISample> = new sample({
-                    userId: eUser._id,
-                    location: sampleFile.path
-                })
+            let newSample: HydratedDocument<ISample> = new sample({
+                location: sampleFile.path
+            })
 
-                let savedSample = await newSample.save()
-                console.log(savedSample.location)
-                res.status(201).json({msg: `${eUser.firstName}, your sample, ${savedSample.location}, has been saved!`})
-            } else {
-                 //if no user send a 401 response
-                res.status(401).json({msg: "Not authorized to use the service!"})
-            }
+            let savedSample = await newSample.save()
+            console.log(savedSample.location)
+            res.status(201).json({msg: `laughter sample: ${savedSample.location}, has been saved!`})
+
+            // if(eUser) {
+            //     //if user exists create a sample model and save in database
+            //     let newSample: HydratedDocument<ISample> = new sample({
+            //         location: sampleFile.path
+            //     })
+
+            //     let savedSample = await newSample.save()
+            //     console.log(savedSample.location)
+            //     res.status(201).json({msg: `${eUser.firstName}, your sample, ${savedSample.location}, has been saved!`})
+            // } else {
+            //      //if no user send a 401 response
+            //     res.status(401).json({msg: "Not authorized to use the service!"})
+            // }
         } catch(e: any) {
             console.log(e)
             next(e)
