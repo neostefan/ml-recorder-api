@@ -1,6 +1,8 @@
+import bcrypt from "bcrypt";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { HydratedDocument } from "mongoose";
 import { user, IUser } from "../models";
+import { signPayload } from "../util";
 
 export const postSignUp: RequestHandler =  async function(req: Request, res: Response, next: NextFunction) {
     let email = req.body.email
@@ -14,15 +16,16 @@ export const postSignUp: RequestHandler =  async function(req: Request, res: Res
         if(existingUser) {
             res.status(401).json({msg: "user already exists, please log in"})
         } else {
+            let hashedPassword = await bcrypt.hash(password, 10)
             let newUser: HydratedDocument<IUser> = new user({
-                email,
-                firstName,
-                lastName,
-                password
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                password: hashedPassword
             });
 
             let savedUser = await newUser.save()
-            res.status(201).json({msg: `Check your email, ${savedUser.firstName}`, user: newUser})
+            res.status(201).json({msg: `please sign in, ${savedUser.firstName}`, user: newUser})
         }
     } catch(e: any) {
         console.log(e)
@@ -38,10 +41,12 @@ export const postLogIn: RequestHandler = async function(req: Request, res: Respo
 
         let existingUser = await user.findOne({email: email})
 
-        if(existingUser) {
+        if(existingUser !== null) {
+            let passwordIsValid = await bcrypt.compare(password, existingUser.password)
 
-            if(existingUser.password == password) {
-                res.status(201).json({msg: `Welcome ${existingUser.firstName}`})
+            if(passwordIsValid) {
+                let token = await signPayload(existingUser._id.toString())
+                res.status(201).json({msg: `Welcome ${existingUser.firstName}`, token: token})
             } else {
                 res.status(401).json({msg: "password not correct!"})
             }

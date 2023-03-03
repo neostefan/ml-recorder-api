@@ -1,0 +1,29 @@
+name: CI/CD recorder api
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs_on: ubuntu-latest
+    steps:
+      - name: checkout the repository
+        uses: actions/checkout@v3
+
+      - name: login to dockerhub
+        env: 
+          USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          docker login --username $USERNAME --password $PASSWORD
+        
+      - name: build image and push to dockerhub
+        run: |
+          docker image build -t neostefan/recorder-api:latest .
+          docker push neostefan/recorder-api:latest
+

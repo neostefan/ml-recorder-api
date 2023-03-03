@@ -8,7 +8,7 @@ import path from "path";
 
 import authRouter from "./routes/auth-routes";
 import appRouter from "./routes/app-routes";
-import fileHandler from "./util/file-handler";
+import fileHandler from "./util/file-util";
 import Checker from "./util/env-checker";
 
 const log_stream = fs.createWriteStream(path.join(__dirname, "access.log"))
@@ -19,14 +19,14 @@ dotenv.config()
 server.use(helmet())
 server.use(morgan('combined', {stream: log_stream}))
 server.use(express.json())
-server.use(express.urlencoded({ extended: true }));
+server.use(express.urlencoded({ extended: false }));
 server.use(fileHandler.single('sample'))
 
 server.use("/auth", authRouter)
 server.use(appRouter)
 
 server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    res.status(500).json({err})    
+    res.status(500).json({err: err.message})    
     next()
 })
 
