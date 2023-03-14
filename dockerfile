@@ -8,5 +8,5 @@ ENV MONGO_DB_PROD_URI=mongodb://db:27017/recorder
 RUN npm install --include=dev
 RUN npm run build
 EXPOSE 3000
-VOLUME [ "/public/data" ]
+VOLUME [ "/public/data/samples" ]
 CMD [ "node", "./dist/server.js" ]
