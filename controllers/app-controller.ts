@@ -1,10 +1,12 @@
 import fs from "fs";
 import path from "path";
 import archiver from "archiver";
+import FormData from "form-data";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import { HydratedDocument } from "mongoose";
 import { ISample, sample, user } from "../models";
-import { ReadDir } from "../util/dir-util";
+import { fdSubmit, dirUtils } from "../util";
+import http from "http";
 
 
 export const getSamples: RequestHandler = async function(req: Request, res: Response, next: NextFunction) {
@@ -15,7 +17,7 @@ export const getSamples: RequestHandler = async function(req: Request, res: Resp
     })
 
     try {
-        let filenames = await ReadDir(samplesPath)
+        let filenames = await dirUtils.ReadDir(samplesPath)
         archive.pipe(write_stream)
 
         for(let file of filenames) {
@@ -65,6 +67,7 @@ export const postSample: RequestHandler = async function(req: Request, res: Resp
                     })
         
                     let savedSample = await newSample.save()
+
                     console.log(savedSample.location)
                     res.status(201).json({msg: `${eUser.firstName}, your sample, ${savedSample.location}, has been saved!`})
                 } else {
